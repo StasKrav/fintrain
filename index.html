@@ -32,8 +32,34 @@
 
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 32px;
+            padding: 28px 32px;
             color: white;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .settings-icon {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .settings-icon:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
         }
 
         .level-info {
@@ -46,11 +72,13 @@
         }
 
         .level-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 20px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 16px;
             border-radius: 40px;
             font-weight: 600;
             font-size: 14px;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
         }
 
         .streak-counter {
@@ -68,126 +96,135 @@
 
         .balance {
             text-align: center;
-            margin-top: 24px;
+            margin-bottom: 28px;
         }
-
+        
         .balance-label {
-            font-size: 14px;
-            opacity: 0.8;
+            font-size: 12px;
+            opacity: 0.7;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
-
+        
         .balance-value {
-            font-size: 56px;
+            font-size: 52px;
             font-weight: 800;
             font-feature-settings: "tnum";
             letter-spacing: -1px;
         }
-
+        
         .balance-warning {
-            margin-top: 8px;
-            font-size: 12px;
+            margin-top: 6px;
+            font-size: 11px;
             background: rgba(255,255,255,0.2);
             display: inline-block;
             padding: 4px 12px;
             border-radius: 20px;
         }
-
+        
         .content {
             padding: 32px;
         }
 
-        .settings-panel {
-            background: #f8f9fa;
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 32px;
+        /* Модальное окно настроек */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
-        .settings-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            font-size: 24px;
+            margin-bottom: 24px;
             color: #333;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
 
-        .settings-controls {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
+        .modal-content input {
+            width: 100%;
+            padding: 16px;
+            font-size: 28px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-weight: 600;
+            font-family: inherit;
+            background: white;
+            transition: all 0.2s;
         }
 
-        .setting-item {
-            flex: 1;
-            min-width: 180px;
+        .settings-group {
+            margin-bottom: 24px;
         }
 
-        .setting-item label {
+        .settings-group label {
             display: block;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             color: #666;
             margin-bottom: 8px;
         }
 
-        .setting-item select,
-        .setting-item input {
+        .settings-group input,
+        .settings-group select {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 16px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            border-radius: 16px;
             font-size: 14px;
             transition: all 0.2s;
         }
 
-        .setting-item select:focus,
-        .setting-item input:focus {
+        .settings-group input:focus,
+        .settings-group select:focus {
             outline: none;
             border-color: #667eea;
         }
 
-        .product-card {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 20px;
-            padding: 24px;
+        .preset-buttons {
+            display: flex;
+            gap: 12px;
             margin-bottom: 24px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
             transition: all 0.2s;
         }
 
-        .product-card.disabled {
-            opacity: 0.5;
-            pointer-events: none;
+        .preset-btn:hover {
+            background: #e0e0e0;
         }
 
-        .product-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .product-category {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 20px;
-        }
-
-        .product-price {
-            font-size: 32px;
-            font-weight: 800;
-            color: #667eea;
-            margin-bottom: 24px;
-        }
-
-        .action-area {
+        .modal-actions {
             display: flex;
             gap: 12px;
-            flex-wrap: wrap;
+            margin-top: 24px;
         }
 
         .btn {
@@ -235,54 +272,44 @@
             color: white;
         }
 
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
+        .product-card {
             background: white;
-            border-radius: 32px;
-            padding: 32px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: all 0.2s;
         }
 
-        .modal-content h3 {
+        .product-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .product-name {
             font-size: 24px;
-            margin-bottom: 20px;
+            font-weight: 700;
             color: #333;
+            margin-bottom: 8px;
         }
 
-        .modal-content input {
-            width: 100%;
-            padding: 16px;
-            font-size: 24px;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-            border-radius: 16px;
-            margin: 20px 0;
-            font-weight: 600;
+        .product-category {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 20px;
         }
 
-        .modal-content input:focus {
-            outline: none;
-            border-color: #667eea;
+        .product-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 24px;
         }
 
-        .modal-actions {
+        .action-area {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .toast {
@@ -310,33 +337,36 @@
             }
         }
 
+        /* Стильный прогресс-бар */
         .level-progress {
-            margin-top: 24px;
+            margin-top: 8px;
+        }
+        
+        .progress-bar-container {
             background: rgba(255,255,255,0.2);
-            border-radius: 20px;
-            padding: 16px;
-        }
-
-        .progress-label {
-            font-size: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .progress-bar {
-            background: rgba(255,255,255,0.3);
-            height: 8px;
+            height: 4px;
             border-radius: 4px;
             overflow: hidden;
         }
-
+        
         .progress-fill {
-            background: white;
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
+            background: linear-gradient(90deg, #ff4d4d, #ffaa00, #4caf50);
             border-radius: 4px;
+        }
+        
+        .progress-stats {
+            text-align: center;
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        }
+        
+        .progress-stats span {
+            font-weight: 600;
         }
 
         .history-section {
@@ -381,60 +411,41 @@
             color: white;
             margin-bottom: 16px;
         }
+        
     </style>
 </head>
 <body>
     <div class="app" id="app">
         <div class="header">
-            <div class="level-info">
+            <div class="header-top">
                 <div class="level-badge" id="levelBadge">Уровень 1</div>
-                <div class="streak-counter">
-                    🔥 Серия правильных ответов
-                    <span id="streakCount">0</span>
-                </div>
+                <button class="settings-icon" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                        <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
+                    </svg>
+                </button>
             </div>
+        
             <div class="balance">
                 <div class="balance-label">ВАШ БАЛАНС</div>
-                <div class="balance-value" id="balanceValue">5000 ₽</div>
+                <div class="balance-value" id="balanceValue">10000 ₽</div>
                 <div class="balance-warning" id="balanceWarning" style="display: none;">⚠️ Низкий баланс! Будьте осторожны</div>
             </div>
+        
             <div class="level-progress">
-                <div class="progress-label">
-                    <span>Прогресс до следующего уровня</span>
-                    <span id="progressText">0/10</span>
-                </div>
-                <div class="progress-bar">
+                <div class="progress-bar-container">
                     <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-stats" id="progressStats">
+                    <span id="currentStreak">0</span>/<span id="requiredStreak">10</span>
                 </div>
             </div>
         </div>
 
         <div class="content">
-            <div class="settings-panel">
-                <div class="settings-title">
-                    ⚙️ Настройки сложности
-                </div>
-                <div class="settings-controls">
-                    <div class="setting-item">
-                        <label>Начальный баланс</label>
-                        <input type="number" id="startBalance" value="10000" step="500" min="500">
-                    </div>
-                    <div class="setting-item">
-                        <label>Диапазон цен (мин)</label>
-                        <input type="number" id="priceMin" value="50" step="50" min="10">
-                    </div>
-                    <div class="setting-item">
-                        <label>Диапазон цен (макс)</label>
-                        <input type="number" id="priceMax" value="100" step="100" min="100">
-                    </div>
-                </div>
-                <div style="margin-top: 12px; font-size: 12px; color: #888;">
-                    💡 Цены будут генерироваться с учётом текущего уровня сложности
-                </div>
-            </div>
-
             <div id="gameOverContainer" style="display: none;"></div>
-
             <div id="productContainer"></div>
 
             <div class="action-area">
@@ -481,6 +492,13 @@
             }
         };
 
+        // ==================== НАСТРОЙКИ ПО УМОЛЧАНИЮ ====================
+        let settings = {
+            startBalance: 10000,
+            priceMin: 100,
+            priceMax: 2000
+        };
+
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
         let currentLevel = 1;
         let currentBalance = 10000;
@@ -488,12 +506,6 @@
         let currentProduct = null;
         let purchaseHistory = [];
         let gameOver = false;
-        
-        let settings = {
-            startBalance: 10000,
-            priceMin: 50,
-            priceMax: 100
-        };
 
         const categories = ["🍕 Еда", "🚗 Транспорт", "📱 Техника", "👕 Одежда", "📚 Книги", "🎮 Развлечения", "💊 Здоровье", "🏃 Спорт", "☕ Кофе", "🎁 Подарки"];
         const productNames = [
@@ -535,49 +547,41 @@
                 try {
                     const data = JSON.parse(saved);
                     currentLevel = data.currentLevel || 1;
-                    currentBalance = data.currentBalance || 5000;
+                    currentBalance = data.currentBalance || 10000;
                     currentStreak = data.currentStreak || 0;
                     purchaseHistory = data.purchaseHistory || [];
                     settings = data.settings || settings;
                     gameOver = data.gameOver || false;
-                    
-                    document.getElementById('startBalance').value = settings.startBalance;
-                    document.getElementById('priceMin').value = settings.priceMin;
-                    document.getElementById('priceMax').value = settings.priceMax;
                 } catch(e) {}
             }
         }
 
-        // Генерация случайного товара
+        // Генерация случайного товара с умной логикой
         function generateProduct() {
             const min = settings.priceMin;
             const max = settings.priceMax;
             
-            // Если баланс меньше минимальной цены, генерируем товар дешевле баланса
+            // Если баланс очень маленький, ограничиваем максимальную цену
             let maxPrice = max;
             if (currentBalance < min) {
-                // Если денег вообще нет - игра окончена
                 if (currentBalance <= 0) {
                     gameOver = true;
                     saveProgress();
                     updateUI();
                     return null;
                 }
-                // Иначе генерируем товар не дороже текущего баланса
                 maxPrice = currentBalance;
+            } else {
+                // Умное ограничение: цена не должна превышать 60% от баланса
+                const safeMax = Math.min(max, Math.floor(currentBalance * 0.6));
+                maxPrice = Math.max(min, safeMax);
             }
             
             let rawPrice = min + Math.random() * (maxPrice - min);
             const modifier = LEVELS[currentLevel].priceModifier;
             let price = modifier(rawPrice);
             
-            // Гарантируем, что цена не превышает баланс (если баланс маленький)
-            if (price > currentBalance && currentBalance > 0) {
-                price = Math.max(min, Math.floor(currentBalance / 10) * 10);
-                if (price > currentBalance) price = currentBalance;
-                if (price < min) price = min;
-            }
-            
+            // Финальная проверка
             price = Math.max(min, Math.min(maxPrice, price));
             
             const name = productNames[Math.floor(Math.random() * productNames.length)];
@@ -591,7 +595,6 @@
             };
         }
 
-        // Проверка возможности покупки
         function canAfford(price) {
             if (gameOver) return false;
             if (currentBalance <= 0) {
@@ -610,9 +613,7 @@
 
         function updateUI() {
             document.getElementById('balanceValue').textContent = `${Math.floor(currentBalance)} ₽`;
-            document.getElementById('streakCount').textContent = currentStreak;
             
-            // Предупреждение о низком балансе
             const warning = document.getElementById('balanceWarning');
             if (currentBalance < settings.startBalance * 0.2 && currentBalance > 0) {
                 warning.style.display = 'block';
@@ -620,21 +621,18 @@
                 warning.style.display = 'none';
             }
             
+            // Обновляем уровень (только название, без описания)
             const levelData = LEVELS[currentLevel];
-            document.getElementById('levelBadge').innerHTML = `${levelData.name} <span style="font-size: 11px;">${levelData.description}</span>`;
+            document.getElementById('levelBadge').innerHTML = `${levelData.name}`;
             
+            // Обновляем прогресс-бар
             const required = levelData.requiredStreak;
-            document.getElementById('progressText').textContent = `${currentStreak}/${required}`;
             const progressPercent = (currentStreak / required) * 100;
             document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('requiredStreak').textContent = required;
             
-            if (currentStreak >= required) {
-                document.getElementById('progressFill').style.backgroundColor = '#ffd700';
-            } else {
-                document.getElementById('progressFill').style.backgroundColor = 'white';
-            }
-            
-            // Обновляем историю
+            // История
             const historyContainer = document.getElementById('historyList');
             if (purchaseHistory.length === 0) {
                 historyContainer.innerHTML = '<div style="color: #ccc;">Пока пусто</div>';
@@ -647,7 +645,7 @@
                 `).join('');
             }
             
-            // Обработка Game Over
+            // Game Over
             const gameOverContainer = document.getElementById('gameOverContainer');
             if (gameOver || currentBalance <= 0) {
                 gameOver = true;
@@ -692,19 +690,13 @@
                 if (!currentProduct) return;
             }
             
-            // Дополнительная проверка: если цена всё ещё больше баланса, генерируем заново
-            if (currentProduct.price > currentBalance && currentBalance > 0) {
-                currentProduct = generateProduct();
-                if (!currentProduct) return;
-            }
-            
             container.innerHTML = `
                 <div class="product-card">
                     <div class="product-name">${currentProduct.name}</div>
-                    <div class="product-category">${currentProduct.category}</div>
+                    <!-- <div class="product-category">${currentProduct.category}</div> -->
                     <div class="product-price">${currentProduct.price} ₽</div>
                     <div style="font-size: 14px; color: #888;">
-                        💡 Введи сумму, которая останется после покупки
+                        Нажмите "Купить" и введи сумму, которая останется после покупки
                     </div>
                 </div>
             `;
@@ -728,28 +720,6 @@
                 return true;
             }
             return false;
-        }
-        
-        function purchaseProduct() {
-            if (gameOver) {
-                showToast('Игра окончена! Сбросьте уровень', true);
-                return;
-            }
-            
-            if (!currentProduct) {
-                currentProduct = generateProduct();
-                if (!currentProduct) return;
-            }
-            
-            const price = currentProduct.price;
-            
-            if (!canAfford(price)) {
-                updateUI();
-                return;
-            }
-            
-            const correctNewBalance = currentBalance - price;
-            openAnswerModal(price, correctNewBalance);
         }
         
         function openAnswerModal(price, correctNewBalance) {
@@ -783,7 +753,6 @@
                 }
                 
                 if (Math.abs(userAnswer - correctNewBalance) < 0.01) {
-                    // Правильный ответ
                     currentBalance = correctNewBalance;
                     currentStreak++;
                     
@@ -796,7 +765,6 @@
                     
                     showToast(`✅ Верно! Остаток: ${currentBalance} ₽`);
                     
-                    // Проверяем, не закончились ли деньги
                     if (currentBalance <= 0) {
                         showToast(`💀 Деньги закончились! Игра окончена.`, true);
                         gameOver = true;
@@ -807,18 +775,11 @@
                     }
                     
                     currentProduct = generateProduct();
-                    
-                    // Если после генерации товара он дороже баланса - перегенерируем
-                    if (currentProduct && currentProduct.price > currentBalance && currentBalance > 0) {
-                        currentProduct = generateProduct();
-                    }
-                    
                     updateUI();
                     saveProgress();
                     checkLevelUp();
                     modal.remove();
                 } else {
-                    // Неправильный ответ
                     currentStreak = 0;
                     showToast(`❌ Неверно! Правильный ответ: ${correctNewBalance} ₽`, true);
                     updateUI();
@@ -833,6 +794,28 @@
                 if (e.key === 'Enter') checkAnswer();
             });
             input.focus();
+        }
+        
+        function purchaseProduct() {
+            if (gameOver) {
+                showToast('Игра окончена! Сбросьте уровень', true);
+                return;
+            }
+            
+            if (!currentProduct) {
+                currentProduct = generateProduct();
+                if (!currentProduct) return;
+            }
+            
+            const price = currentProduct.price;
+            
+            if (!canAfford(price)) {
+                updateUI();
+                return;
+            }
+            
+            const correctNewBalance = currentBalance - price;
+            openAnswerModal(price, correctNewBalance);
         }
         
         function skipProduct() {
@@ -862,25 +845,90 @@
             }
         }
         
-        function applySettings() {
-            const newStartBalance = parseInt(document.getElementById('startBalance').value);
-            const newPriceMin = parseInt(document.getElementById('priceMin').value);
-            const newPriceMax = parseInt(document.getElementById('priceMax').value);
+        // ==================== МОДАЛЬНОЕ ОКНО НАСТРОЕК ====================
+        function openSettingsModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Настройки сложности</h3>
+                    
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="easy">🟢 Лёгкий</button>
+                        <button class="preset-btn" data-preset="medium">🟡 Средний</button>
+                        <button class="preset-btn" data-preset="hard">🔴 Сложный</button>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label>💰 Начальный баланс</label>
+                        <input type="number" id="modalStartBalance" value="${settings.startBalance}" step="500" min="500">
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label>📉 Минимальная цена</label>
+                        <input type="number" id="modalPriceMin" value="${settings.priceMin}" step="50" min="10">
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label>📈 Максимальная цена</label>
+                        <input type="number" id="modalPriceMax" value="${settings.priceMax}" step="100" min="100">
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="cancelSettingsBtn">Отмена</button>
+                        <button class="btn btn-primary" id="saveSettingsBtn">Сохранить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
             
-            if (newPriceMin >= newPriceMax) {
-                showToast('Минимальная цена должна быть меньше максимальной', true);
-                return;
-            }
-            
-            settings = {
-                startBalance: newStartBalance,
-                priceMin: newPriceMin,
-                priceMax: newPriceMax
+            // Пресеты сложности
+            const presets = {
+                easy: { startBalance: 15000, priceMin: 50, priceMax: 1500 },
+                medium: { startBalance: 10000, priceMin: 100, priceMax: 2000 },
+                hard: { startBalance: 5000, priceMin: 200, priceMax: 3000 }
             };
             
-            resetGame();
+            modal.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const preset = presets[btn.dataset.preset];
+                    if (preset) {
+                        modal.querySelector('#modalStartBalance').value = preset.startBalance;
+                        modal.querySelector('#modalPriceMin').value = preset.priceMin;
+                        modal.querySelector('#modalPriceMax').value = preset.priceMax;
+                        showToast(`Выбран ${btn.textContent} режим`);
+                    }
+                };
+            });
+            
+            const saveBtn = modal.querySelector('#saveSettingsBtn');
+            const cancelBtn = modal.querySelector('#cancelSettingsBtn');
+            
+            saveBtn.onclick = () => {
+                const newStartBalance = parseInt(modal.querySelector('#modalStartBalance').value);
+                const newPriceMin = parseInt(modal.querySelector('#modalPriceMin').value);
+                const newPriceMax = parseInt(modal.querySelector('#modalPriceMax').value);
+                
+                if (newPriceMin >= newPriceMax) {
+                    showToast('Минимальная цена должна быть меньше максимальной', true);
+                    return;
+                }
+                
+                settings = {
+                    startBalance: newStartBalance,
+                    priceMin: newPriceMin,
+                    priceMax: newPriceMax
+                };
+                
+                resetGame();
+                modal.remove();
+                showToast('Настройки сохранены');
+            };
+            
+            cancelBtn.onclick = () => modal.remove();
         }
         
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
         function init() {
             loadProgress();
             
@@ -893,14 +941,7 @@
             document.getElementById('buyBtn').onclick = purchaseProduct;
             document.getElementById('skipBtn').onclick = skipProduct;
             document.getElementById('resetBtn').onclick = resetCurrentLevel;
-            
-            const startBalanceInput = document.getElementById('startBalance');
-            const priceMinInput = document.getElementById('priceMin');
-            const priceMaxInput = document.getElementById('priceMax');
-            
-            [startBalanceInput, priceMinInput, priceMaxInput].forEach(input => {
-                input.addEventListener('change', applySettings);
-            });
+            document.getElementById('settingsBtn').onclick = openSettingsModal;
         }
         
         init();
