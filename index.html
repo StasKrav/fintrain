@@ -63,14 +63,6 @@
             transform: rotate(90deg);
         }
 
-        .level-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
 
         .level-badge {
             background: rgba(255,255,255,0.15);
@@ -82,18 +74,7 @@
             backdrop-filter: blur(4px);
         }
 
-        .streak-counter {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-size: 14px;
-        }
 
-        .streak-counter span {
-            font-size: 20px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
 
         .balance {
             text-align: center;
@@ -144,11 +125,26 @@
 
         .modal-content {
             background: white;
-            border-radius: 32px;
+            border-radius: 40px;
             padding: 32px;
-            max-width: 480px;
+            max-width: 420px;
             width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            animation: modalSlideIn 0.3s ease;
         }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
 
         .modal-content h3 {
             font-size: 24px;
@@ -161,16 +157,22 @@
 
         .modal-content input {
             width: 100%;
-            padding: 16px;
-            font-size: 28px;
+            padding: 18px;
+            font-size: 32px;
             text-align: center;
-            border: 2px solid #e0e0e0;
-            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 28px;
             margin: 20px 0;
             font-weight: 600;
-            font-family: inherit;
-            background: white;
+            font-family: monospace;
+            background: #fafcff;
             transition: all 0.2s;
+        }
+        
+        .modal-content input:focus {
+            outline: none;
+            border-color: #2c7a4d;
+            background: white;
         }
 
         .settings-group {
@@ -231,7 +233,7 @@
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 12px;
+            border-radius: 24px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -354,10 +356,10 @@
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
-            background: linear-gradient(90deg, #fff, #ffaa00, #555);
+            background: linear-gradient(90deg, #fff, #2c7a4d, #555);
             border-radius: 4px;
         }
-        
+       
         .progress-stats {
             text-align: center;
             font-size: 11px;
@@ -412,6 +414,7 @@
             color: white;
             margin-bottom: 16px;
         }
+   
         
     </style>
 </head>
@@ -496,8 +499,8 @@
         // ==================== НАСТРОЙКИ ПО УМОЛЧАНИЮ ====================
         let settings = {
             startBalance: 10000,
-            priceMin: 100,
-            priceMax: 2000
+            priceMin: 50,
+            priceMax: 100
         };
 
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
