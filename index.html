@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Финансовый тренажёр — устный счёт</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,8 +13,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Comfortaa', 'Roboto', sans-serif;
+            background: #eef2f5;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -31,7 +32,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c7a4d, #3fbf7a);
             padding: 28px 32px;
             color: white;
         }
@@ -197,7 +198,7 @@
         .settings-group input:focus,
         .settings-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2c7a4d;
         }
 
         .preset-buttons {
@@ -248,14 +249,14 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c7a4d, #3fbf7a);
             color: white;
             flex: 1;
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+            box-shadow: 0 4px 12px rgba(37, 39, 37, 0.4);
         }
 
         .btn-secondary {
@@ -302,7 +303,7 @@
         .product-price {
             font-size: 32px;
             font-weight: 800;
-            color: #667eea;
+            color: #2c7a4d;
             margin-bottom: 24px;
         }
 
@@ -353,7 +354,7 @@
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
-            background: linear-gradient(90deg, #ff4d4d, #ffaa00, #4caf50);
+            background: linear-gradient(90deg, #fff, #ffaa00, #555);
             border-radius: 4px;
         }
         
@@ -455,7 +456,7 @@
             </div>
 
             <div class="history-section">
-                <div class="history-title">📋 История покупок</div>
+                <div class="history-title">История покупок</div>
                 <div class="history-list" id="historyList">
                     <div style="color: #ccc;">Пока пусто</div>
                 </div>
@@ -727,9 +728,9 @@
             modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h3>💰 Сколько останется?</h3>
+                    <h3>Сколько останется?</h3>
                     <div style="font-size: 20px; color: #888; margin-bottom: 8px;">Текущий баланс: ${currentBalance} ₽</div>
-                    <div style="font-size: 36px; font-weight: bold; color: #667eea; margin: 20px 0;">
+                    <div style="font-size: 36px; font-weight: bold; color: #888; margin: 20px 0;">
                         ${price} ₽
                     </div>
                     <input type="number" id="answerInput" placeholder="Введи сумму" autofocus>
