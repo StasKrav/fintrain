@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый тренажёр — устный счёт</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .app {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 32px;
+            color: white;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .level-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .streak-counter {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+        }
+
+        .streak-counter span {
+            font-size: 20px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .balance {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.8;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .balance-value {
+            font-size: 56px;
+            font-weight: 800;
+            font-feature-settings: "tnum";
+            letter-spacing: -1px;
+        }
+
+        .balance-warning {
+            margin-top: 8px;
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .settings-panel {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .setting-item {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .setting-item label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .setting-item select,
+        .setting-item input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .setting-item select:focus,
+        .setting-item input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .product-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .product-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .product-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .product-category {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .product-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 24px;
+        }
+
+        .action-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #666;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #dee2e6;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 16px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 14px;
+            z-index: 1100;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .level-progress {
+            margin-top: 24px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 16px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .history-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #666;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .game-over {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .game-over h3 {
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .game-over p {
+            color: white;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app" id="app">
+        <div class="header">
+            <div class="level-info">
+                <div class="level-badge" id="levelBadge">Уровень 1</div>
+                <div class="streak-counter">
+                    🔥 Серия правильных ответов
+                    <span id="streakCount">0</span>
+                </div>
+            </div>
+            <div class="balance">
+                <div class="balance-label">ВАШ БАЛАНС</div>
+                <div class="balance-value" id="balanceValue">5000 ₽</div>
+                <div class="balance-warning" id="balanceWarning" style="display: none;">⚠️ Низкий баланс! Будьте осторожны</div>
+            </div>
+            <div class="level-progress">
+                <div class="progress-label">
+                    <span>Прогресс до следующего уровня</span>
+                    <span id="progressText">0/10</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="settings-panel">
+                <div class="settings-title">
+                    ⚙️ Настройки сложности
+                </div>
+                <div class="settings-controls">
+                    <div class="setting-item">
+                        <label>Начальный баланс</label>
+                        <input type="number" id="startBalance" value="10000" step="500" min="500">
+                    </div>
+                    <div class="setting-item">
+                        <label>Диапазон цен (мин)</label>
+                        <input type="number" id="priceMin" value="50" step="50" min="10">
+                    </div>
+                    <div class="setting-item">
+                        <label>Диапазон цен (макс)</label>
+                        <input type="number" id="priceMax" value="100" step="100" min="100">
+                    </div>
+                </div>
+                <div style="margin-top: 12px; font-size: 12px; color: #888;">
+                    💡 Цены будут генерироваться с учётом текущего уровня сложности
+                </div>
+            </div>
+
+            <div id="gameOverContainer" style="display: none;"></div>
+
+            <div id="productContainer"></div>
+
+            <div class="action-area">
+                <button class="btn btn-primary" id="buyBtn">Купить</button>
+                <button class="btn btn-secondary" id="skipBtn">Следующий товар</button>
+                <button class="btn btn-secondary" id="resetBtn">Сбросить уровень</button>
+            </div>
+
+            <div class="history-section">
+                <div class="history-title">📋 История покупок</div>
+                <div class="history-list" id="historyList">
+                    <div style="color: #ccc;">Пока пусто</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ====================
+        const LEVELS = {
+            1: {
+                name: "Уровень 1",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price / 50) * 50,
+                description: "Цены кратны 50 ₽"
+            },
+            2: {
+                name: "Уровень 2",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price / 10) * 10,
+                description: "Цены кратны 10 ₽"
+            },
+            3: {
+                name: "Уровень 3",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price / 5) * 5,
+                description: "Цены кратны 5 ₽"
+            },
+            4: {
+                name: "Уровень 4 (Мастер)",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price),
+                description: "Любые цены"
+            }
+        };
+
+        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+        let currentLevel = 1;
+        let currentBalance = 10000;
+        let currentStreak = 0;
+        let currentProduct = null;
+        let purchaseHistory = [];
+        let gameOver = false;
+        
+        let settings = {
+            startBalance: 10000,
+            priceMin: 50,
+            priceMax: 100
+        };
+
+        const categories = ["🍕 Еда", "🚗 Транспорт", "📱 Техника", "👕 Одежда", "📚 Книги", "🎮 Развлечения", "💊 Здоровье", "🏃 Спорт", "☕ Кофе", "🎁 Подарки"];
+        const productNames = [
+            "Пицца Маргарита", "Проездной билет", "Смарт-часы", "Джинсы", "Книга-бестселлер",
+            "Игровая приставка", "Витамины", "Абонемент в зал", "Латте с корицей", "Набор для творчества",
+            "Рюкзак", "Наушники", "Стейк", "Такси", "Подарочная карта", "Кроссовки", "Кофеварка",
+            "Билет в кино", "Парфюм", "Настольная игра"
+        ];
+
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        function showToast(message, isError = false) {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.background = isError ? '#dc3545' : '#28a745';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        function saveProgress() {
+            const progress = {
+                currentLevel,
+                currentBalance,
+                currentStreak,
+                purchaseHistory,
+                settings,
+                gameOver
+            };
+            localStorage.setItem('financeTrainer', JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('financeTrainer');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currentLevel = data.currentLevel || 1;
+                    currentBalance = data.currentBalance || 5000;
+                    currentStreak = data.currentStreak || 0;
+                    purchaseHistory = data.purchaseHistory || [];
+                    settings = data.settings || settings;
+                    gameOver = data.gameOver || false;
+                    
+                    document.getElementById('startBalance').value = settings.startBalance;
+                    document.getElementById('priceMin').value = settings.priceMin;
+                    document.getElementById('priceMax').value = settings.priceMax;
+                } catch(e) {}
+            }
+        }
+
+        // Генерация случайного товара
+        function generateProduct() {
+            const min = settings.priceMin;
+            const max = settings.priceMax;
+            
+            // Если баланс меньше минимальной цены, генерируем товар дешевле баланса
+            let maxPrice = max;
+            if (currentBalance < min) {
+                // Если денег вообще нет - игра окончена
+                if (currentBalance <= 0) {
+                    gameOver = true;
+                    saveProgress();
+                    updateUI();
+                    return null;
+                }
+                // Иначе генерируем товар не дороже текущего баланса
+                maxPrice = currentBalance;
+            }
+            
+            let rawPrice = min + Math.random() * (maxPrice - min);
+            const modifier = LEVELS[currentLevel].priceModifier;
+            let price = modifier(rawPrice);
+            
+            // Гарантируем, что цена не превышает баланс (если баланс маленький)
+            if (price > currentBalance && currentBalance > 0) {
+                price = Math.max(min, Math.floor(currentBalance / 10) * 10);
+                if (price > currentBalance) price = currentBalance;
+                if (price < min) price = min;
+            }
+            
+            price = Math.max(min, Math.min(maxPrice, price));
+            
+            const name = productNames[Math.floor(Math.random() * productNames.length)];
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            
+            return {
+                name,
+                category,
+                price,
+                id: Date.now() + Math.random()
+            };
+        }
+
+        // Проверка возможности покупки
+        function canAfford(price) {
+            if (gameOver) return false;
+            if (currentBalance <= 0) {
+                showToast('💀 Игра окончена! Нажмите "Сбросить уровень"', true);
+                return false;
+            }
+            if (price > currentBalance) {
+                showToast(`❌ Не хватает ${Math.abs(currentBalance - price)} ₽!`, true);
+                currentStreak = 0;
+                updateUI();
+                saveProgress();
+                return false;
+            }
+            return true;
+        }
+
+        function updateUI() {
+            document.getElementById('balanceValue').textContent = `${Math.floor(currentBalance)} ₽`;
+            document.getElementById('streakCount').textContent = currentStreak;
+            
+            // Предупреждение о низком балансе
+            const warning = document.getElementById('balanceWarning');
+            if (currentBalance < settings.startBalance * 0.2 && currentBalance > 0) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+            
+            const levelData = LEVELS[currentLevel];
+            document.getElementById('levelBadge').innerHTML = `${levelData.name} <span style="font-size: 11px;">${levelData.description}</span>`;
+            
+            const required = levelData.requiredStreak;
+            document.getElementById('progressText').textContent = `${currentStreak}/${required}`;
+            const progressPercent = (currentStreak / required) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            
+            if (currentStreak >= required) {
+                document.getElementById('progressFill').style.backgroundColor = '#ffd700';
+            } else {
+                document.getElementById('progressFill').style.backgroundColor = 'white';
+            }
+            
+            // Обновляем историю
+            const historyContainer = document.getElementById('historyList');
+            if (purchaseHistory.length === 0) {
+                historyContainer.innerHTML = '<div style="color: #ccc;">Пока пусто</div>';
+            } else {
+                historyContainer.innerHTML = purchaseHistory.slice(-10).reverse().map(item => `
+                    <div class="history-item">
+                        ${item.name} — ${item.price} ₽ → осталось: ${item.newBalance} ₽
+                        <span style="font-size: 11px; color: #aaa;">${new Date(item.date).toLocaleTimeString()}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Обработка Game Over
+            const gameOverContainer = document.getElementById('gameOverContainer');
+            if (gameOver || currentBalance <= 0) {
+                gameOver = true;
+                gameOverContainer.style.display = 'block';
+                gameOverContainer.innerHTML = `
+                    <div class="game-over">
+                        <h3>💀 ИГРА ОКОНЧЕНА 💀</h3>
+                        <p>Вы потратили все деньги! Баланс: ${currentBalance} ₽</p>
+                        <button class="btn btn-danger" id="restartGameBtn">🔄 Начать заново</button>
+                    </div>
+                `;
+                document.getElementById('buyBtn').disabled = true;
+                document.getElementById('skipBtn').disabled = true;
+                document.getElementById('restartGameBtn').onclick = () => {
+                    resetGame();
+                };
+            } else {
+                gameOverContainer.style.display = 'none';
+                document.getElementById('buyBtn').disabled = false;
+                document.getElementById('skipBtn').disabled = false;
+            }
+            
+            renderProduct();
+        }
+        
+        function renderProduct() {
+            const container = document.getElementById('productContainer');
+            
+            if (gameOver || currentBalance <= 0) {
+                container.innerHTML = `
+                    <div class="product-card disabled">
+                        <div class="product-name">💰 Игра завершена</div>
+                        <div class="product-category">Нажмите "Сбросить уровень" чтобы продолжить</div>
+                        <div class="product-price">- ₽</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (!currentProduct || currentProduct.price > currentBalance) {
+                currentProduct = generateProduct();
+                if (!currentProduct) return;
+            }
+            
+            // Дополнительная проверка: если цена всё ещё больше баланса, генерируем заново
+            if (currentProduct.price > currentBalance && currentBalance > 0) {
+                currentProduct = generateProduct();
+                if (!currentProduct) return;
+            }
+            
+            container.innerHTML = `
+                <div class="product-card">
+                    <div class="product-name">${currentProduct.name}</div>
+                    <div class="product-category">${currentProduct.category}</div>
+                    <div class="product-price">${currentProduct.price} ₽</div>
+                    <div style="font-size: 14px; color: #888;">
+                        💡 Введи сумму, которая останется после покупки
+                    </div>
+                </div>
+            `;
+        }
+        
+        function checkLevelUp() {
+            if (gameOver) return false;
+            
+            const required = LEVELS[currentLevel].requiredStreak;
+            if (currentStreak >= required && currentLevel < 4) {
+                const nextLevel = currentLevel + 1;
+                showToast(`🎉 Поздравляю! Открыт ${LEVELS[nextLevel].name}!`, false);
+                currentLevel = nextLevel;
+                currentStreak = 0;
+                currentProduct = generateProduct();
+                updateUI();
+                saveProgress();
+                return true;
+            } else if (currentLevel === 4 && currentStreak >= required) {
+                showToast(`🏆 Вы мастер устного счёта! Продолжайте в том же духе!`, false);
+                return true;
+            }
+            return false;
+        }
+        
+        function purchaseProduct() {
+            if (gameOver) {
+                showToast('Игра окончена! Сбросьте уровень', true);
+                return;
+            }
+            
+            if (!currentProduct) {
+                currentProduct = generateProduct();
+                if (!currentProduct) return;
+            }
+            
+            const price = currentProduct.price;
+            
+            if (!canAfford(price)) {
+                updateUI();
+                return;
+            }
+            
+            const correctNewBalance = currentBalance - price;
+            openAnswerModal(price, correctNewBalance);
+        }
+        
+        function openAnswerModal(price, correctNewBalance) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>💰 Сколько останется?</h3>
+                    <div style="font-size: 20px; color: #888; margin-bottom: 8px;">Текущий баланс: ${currentBalance} ₽</div>
+                    <div style="font-size: 36px; font-weight: bold; color: #667eea; margin: 20px 0;">
+                        ${price} ₽
+                    </div>
+                    <input type="number" id="answerInput" placeholder="Введи сумму" autofocus>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+                        <button class="btn btn-primary" id="submitBtn">Проверить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const input = modal.querySelector('#answerInput');
+            const submitBtn = modal.querySelector('#submitBtn');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            
+            const checkAnswer = () => {
+                const userAnswer = parseFloat(input.value);
+                if (isNaN(userAnswer)) {
+                    showToast('Введи число!', true);
+                    return;
+                }
+                
+                if (Math.abs(userAnswer - correctNewBalance) < 0.01) {
+                    // Правильный ответ
+                    currentBalance = correctNewBalance;
+                    currentStreak++;
+                    
+                    purchaseHistory.push({
+                        name: currentProduct.name,
+                        price: price,
+                        newBalance: currentBalance,
+                        date: new Date().toISOString()
+                    });
+                    
+                    showToast(`✅ Верно! Остаток: ${currentBalance} ₽`);
+                    
+                    // Проверяем, не закончились ли деньги
+                    if (currentBalance <= 0) {
+                        showToast(`💀 Деньги закончились! Игра окончена.`, true);
+                        gameOver = true;
+                        saveProgress();
+                        updateUI();
+                        modal.remove();
+                        return;
+                    }
+                    
+                    currentProduct = generateProduct();
+                    
+                    // Если после генерации товара он дороже баланса - перегенерируем
+                    if (currentProduct && currentProduct.price > currentBalance && currentBalance > 0) {
+                        currentProduct = generateProduct();
+                    }
+                    
+                    updateUI();
+                    saveProgress();
+                    checkLevelUp();
+                    modal.remove();
+                } else {
+                    // Неправильный ответ
+                    currentStreak = 0;
+                    showToast(`❌ Неверно! Правильный ответ: ${correctNewBalance} ₽`, true);
+                    updateUI();
+                    saveProgress();
+                    modal.remove();
+                }
+            };
+            
+            submitBtn.onclick = checkAnswer;
+            cancelBtn.onclick = () => modal.remove();
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            });
+            input.focus();
+        }
+        
+        function skipProduct() {
+            if (gameOver) {
+                showToast('Игра окончена! Сбросьте уровень', true);
+                return;
+            }
+            currentProduct = generateProduct();
+            updateUI();
+            showToast('🔄 Новый товар');
+        }
+        
+        function resetGame() {
+            gameOver = false;
+            currentBalance = settings.startBalance;
+            currentStreak = 0;
+            currentProduct = generateProduct();
+            purchaseHistory = [];
+            updateUI();
+            saveProgress();
+            showToast(`Игра перезапущена! Баланс: ${currentBalance} ₽`);
+        }
+        
+        function resetCurrentLevel() {
+            if (confirm(`Сбросить ${LEVELS[currentLevel].name}? Прогресс будет потерян.`)) {
+                resetGame();
+            }
+        }
+        
+        function applySettings() {
+            const newStartBalance = parseInt(document.getElementById('startBalance').value);
+            const newPriceMin = parseInt(document.getElementById('priceMin').value);
+            const newPriceMax = parseInt(document.getElementById('priceMax').value);
+            
+            if (newPriceMin >= newPriceMax) {
+                showToast('Минимальная цена должна быть меньше максимальной', true);
+                return;
+            }
+            
+            settings = {
+                startBalance: newStartBalance,
+                priceMin: newPriceMin,
+                priceMax: newPriceMax
+            };
+            
+            resetGame();
+        }
+        
+        function init() {
+            loadProgress();
+            
+            if (!currentProduct && !gameOver && currentBalance > 0) {
+                currentProduct = generateProduct();
+            }
+            
+            updateUI();
+            
+            document.getElementById('buyBtn').onclick = purchaseProduct;
+            document.getElementById('skipBtn').onclick = skipProduct;
+            document.getElementById('resetBtn').onclick = resetCurrentLevel;
+            
+            const startBalanceInput = document.getElementById('startBalance');
+            const priceMinInput = document.getElementById('priceMin');
+            const priceMaxInput = document.getElementById('priceMax');
+            
+            [startBalanceInput, priceMinInput, priceMaxInput].forEach(input => {
+                input.addEventListener('change', applySettings);
+            });
+        }
+        
+        init();
+    </script>
+</body>
+</html>
