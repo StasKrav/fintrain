@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Финансовый тренажёр — устный счёт</title>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -214,7 +215,7 @@
             padding: 10px;
             background: #f0f0f0;
             border: none;
-            border-radius: 12px;
+            border-radius: 24px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s;
@@ -273,6 +274,11 @@
         .btn-danger {
             background: #dc3545;
             color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+            transform: translateY(-1px);
         }
 
         .product-card {
@@ -415,8 +421,13 @@
             margin-bottom: 16px;
         }
    
-        
+        /* Стиль для бейджа текущего режима */
+        #currentPresetBadge {
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
     </style>
+
 </head>
 <body>
     <div class="app" id="app">
@@ -710,19 +721,40 @@
             if (gameOver) return false;
             
             const required = LEVELS[currentLevel].requiredStreak;
+            
+            // Если это 4-й уровень и набрано 10 правильных ответов
+            if (currentLevel === 4 && currentStreak >= required) {
+                // Показываем финальный салют
+                fireBigConfetti();
+                
+                // Показываем модальное окно с поздравлением и предложением начать заново
+                showVictoryModal();
+                
+                return true;
+            }
+            
+            // Переход на следующий уровень (для 1-3 уровней)
             if (currentStreak >= required && currentLevel < 4) {
                 const nextLevel = currentLevel + 1;
-                showToast(`🎉 Поздравляю! Открыт ${LEVELS[nextLevel].name}!`, false);
+                
+                if (nextLevel === 3) {
+                    fireConfetti();
+                    showToast(`🎉 Поздравляю! Открыт ${LEVELS[nextLevel].name}! 🎉`, false);
+                } else if (nextLevel === 4) {
+                    fireBigConfetti();
+                    showToast(`🏆 ВОЛШЕБНО! Вы достигли ${LEVELS[nextLevel].name}! 🏆`, false);
+                } else {
+                    showToast(`🎉 Поздравляю! Открыт ${LEVELS[nextLevel].name}!`, false);
+                }
+                
                 currentLevel = nextLevel;
                 currentStreak = 0;
                 currentProduct = generateProduct();
                 updateUI();
                 saveProgress();
                 return true;
-            } else if (currentLevel === 4 && currentStreak >= required) {
-                showToast(`🏆 Вы мастер устного счёта! Продолжайте в том же духе!`, false);
-                return true;
             }
+            
             return false;
         }
         
@@ -848,19 +880,83 @@
                 resetGame();
             }
         }
+
+        // Финальное окно после прохождения 4-го уровня
+        function showVictoryModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px; text-align: center;">
+                    <h3>🏆 ПОБЕДА! 🏆</h3>
+                    <div style="font-size: 48px; margin: 20px 0;">🎉🎊🎉</div>
+                    <p style="font-size: 18px; margin-bottom: 16px;">Вы прошли все уровни!</p>
+                    <p style="color: #666; margin-bottom: 24px;">Правильных ответов: ${currentStreak}<br>Остаток на счету: ${currentBalance} ₽</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" id="restartFromLevel1">Играть с 1-го уровня</button>
+                        <button class="btn btn-secondary" id="continueGame">Продолжить тренировку</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const restartBtn = modal.querySelector('#restartFromLevel1');
+            const continueBtn = modal.querySelector('#continueGame');
+            
+            restartBtn.onclick = () => {
+                // Полный сброс на 1-й уровень
+                currentLevel = 1;
+                currentBalance = settings.startBalance;
+                currentStreak = 0;
+                currentProduct = generateProduct();
+                purchaseHistory = [];
+                gameOver = false;
+                updateUI();
+                saveProgress();
+                modal.remove();
+                showToast('Начинаем с 1-го уровня! Удачи!');
+            };
+            
+            continueBtn.onclick = () => {
+                // Продолжаем на 4-м уровне, но сбрасываем счётчик серии
+                currentStreak = 0;
+                updateUI();
+                saveProgress();
+                modal.remove();
+                showToast('⭐ Продолжайте тренировку! Каждые 10 ответов — салют!');
+            };
+        }
         
         // ==================== МОДАЛЬНОЕ ОКНО НАСТРОЕК ====================
         function openSettingsModal() {
+            // Определяем текущий уровень сложности по настройкам
+            let currentPreset = 'medium'; // по умолчанию
+            if (settings.startBalance === 15000 && settings.priceMin === 50 && settings.priceMax === 1500) {
+                currentPreset = 'easy';
+            } else if (settings.startBalance === 10000 && settings.priceMin === 100 && settings.priceMax === 2000) {
+                currentPreset = 'medium';
+            } else if (settings.startBalance === 5000 && settings.priceMin === 200 && settings.priceMax === 3000) {
+                currentPreset = 'hard';
+            } else {
+                currentPreset = 'custom'; // пользовательские настройки
+            }
+            
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h3>Настройки сложности</h3>
+                    <h3>Настройки</h3>
+                    
+                    <div style="background: #f8f9fa; border-radius: 16px; padding: 12px; margin-bottom: 20px; text-align: center;">
+                        <span style="font-size: 13px; color: #666;">Текущий режим:</span>
+                        <span id="currentPresetBadge" style="display: inline-block; margin-left: 8px; padding: 4px 12px; border-radius: 24px; font-weight: 600; font-size: 13px;">
+                            ${currentPreset === 'easy' ? '🟢 Лёгкий' : currentPreset === 'medium' ? '🟡 Средний' : currentPreset === 'hard' ? '🔴 Сложный' : '⚙️ Пользовательский'}
+                        </span>
+                    </div>
                     
                     <div class="preset-buttons">
-                        <button class="preset-btn" data-preset="easy">🟢 Лёгкий</button>
-                        <button class="preset-btn" data-preset="medium">🟡 Средний</button>
-                        <button class="preset-btn" data-preset="hard">🔴 Сложный</button>
+                        <button class="preset-btn" data-preset="easy" style="${currentPreset === 'easy' ? 'background: #667eea; color: white;' : ''}">Лёгкий</button>
+                        <button class="preset-btn" data-preset="medium" style="${currentPreset === 'medium' ? 'background: #667eea; color: white;' : ''}">Средний</button>
+                        <button class="preset-btn" data-preset="hard" style="${currentPreset === 'hard' ? 'background: #667eea; color: white;' : ''}">Сложный</button>
                     </div>
                     
                     <div class="settings-group">
@@ -878,6 +974,12 @@
                         <input type="number" id="modalPriceMax" value="${settings.priceMax}" step="100" min="100">
                     </div>
                     
+                    <div style="border-top: 1px solid #e9ecef; margin: 20px 0;"></div>
+                    
+                    <button class="btn btn-danger" id="fullResetFromSettings" style="width: 100%; margin-bottom: 16px; background: linear-gradient(135deg, #999 0%, #ddd 100%);">
+                        Начать игру с 1-го уровня
+                    </button>
+                    
                     <div class="modal-actions">
                         <button class="btn btn-secondary" id="cancelSettingsBtn">Отмена</button>
                         <button class="btn btn-primary" id="saveSettingsBtn">Сохранить</button>
@@ -886,11 +988,58 @@
             `;
             document.body.appendChild(modal);
             
+            // Функция обновления подсветки кнопок и бейджа
+            function updatePresetHighlight() {
+                const startBalance = parseInt(modal.querySelector('#modalStartBalance').value);
+                const priceMin = parseInt(modal.querySelector('#modalPriceMin').value);
+                const priceMax = parseInt(modal.querySelector('#modalPriceMax').value);
+                
+                let preset = 'custom';
+                if (startBalance === 10000 && priceMin === 50 && priceMax === 200) {
+                    preset = 'easy';
+                } else if (startBalance === 50000 && priceMin === 100 && priceMax === 2000) {
+                    preset = 'medium';
+                } else if (startBalance === 100000 && priceMin === 200 && priceMax === 5000) {
+                    preset = 'hard';
+                }
+                
+                // Обновляем бейдж
+                const badge = modal.querySelector('#currentPresetBadge');
+                if (preset === 'easy') {
+                    badge.innerHTML = 'Лёгкий';
+                    badge.style.background = '#e8f5e9';
+                    badge.style.color = '#2e7d32';
+                } else if (preset === 'medium') {
+                    badge.innerHTML = 'Средний';
+                    badge.style.background = '#fff3e0';
+                    badge.style.color = '#ed6c02';
+                } else if (preset === 'hard') {
+                    badge.innerHTML = 'Сложный';
+                    badge.style.background = '#ffebee';
+                    badge.style.color = '#d32f2f';
+                } else {
+                    badge.innerHTML = 'Пользовательский';
+                    badge.style.background = '#e2e2e2';
+                    badge.style.color = '#555';
+                }
+                
+                // Обновляем стили кнопок
+                modal.querySelectorAll('.preset-btn').forEach(btn => {
+                    if (btn.dataset.preset === preset) {
+                        btn.style.background = '#a6a6a6';
+                        btn.style.color = 'white';
+                    } else {
+                        btn.style.background = '#f0f0f0';
+                        btn.style.color = '#333';
+                    }
+                });
+            }
+            
             // Пресеты сложности
             const presets = {
-                easy: { startBalance: 15000, priceMin: 50, priceMax: 1500 },
-                medium: { startBalance: 10000, priceMin: 100, priceMax: 2000 },
-                hard: { startBalance: 5000, priceMin: 200, priceMax: 3000 }
+                easy: { startBalance: 10000, priceMin: 50, priceMax: 200 },
+                medium: { startBalance: 50000, priceMin: 100, priceMax: 2000 },
+                hard: { startBalance: 100000, priceMin: 200, priceMax: 5000 }
             };
             
             modal.querySelectorAll('.preset-btn').forEach(btn => {
@@ -900,10 +1049,37 @@
                         modal.querySelector('#modalStartBalance').value = preset.startBalance;
                         modal.querySelector('#modalPriceMin').value = preset.priceMin;
                         modal.querySelector('#modalPriceMax').value = preset.priceMax;
+                        updatePresetHighlight();
                         showToast(`Выбран ${btn.textContent} режим`);
                     }
                 };
             });
+            
+            // Следим за изменениями полей
+            const startBalanceInput = modal.querySelector('#modalStartBalance');
+            const priceMinInput = modal.querySelector('#modalPriceMin');
+            const priceMaxInput = modal.querySelector('#modalPriceMax');
+            
+            [startBalanceInput, priceMinInput, priceMaxInput].forEach(input => {
+                input.addEventListener('input', updatePresetHighlight);
+            });
+            
+            // Кнопка полного сброса
+            const fullResetBtn = modal.querySelector('#fullResetFromSettings');
+            fullResetBtn.onclick = () => {
+                if (confirm('⚠️ ВНИМАНИЕ! Это сбросит весь прогресс:\n• Все уровни\n• Баланс\n• Историю покупок\n\nНачать с 1-го уровня?')) {
+                    currentLevel = 1;
+                    currentBalance = settings.startBalance;
+                    currentStreak = 0;
+                    currentProduct = generateProduct();
+                    purchaseHistory = [];
+                    gameOver = false;
+                    updateUI();
+                    saveProgress();
+                    modal.remove();
+                    showToast('Игра сброшена! Начинаем с 1-го уровня');
+                }
+            };
             
             const saveBtn = modal.querySelector('#saveSettingsBtn');
             const cancelBtn = modal.querySelector('#cancelSettingsBtn');
@@ -930,6 +1106,186 @@
             };
             
             cancelBtn.onclick = () => modal.remove();
+            
+            // Инициализируем подсветку
+            updatePresetHighlight();
+        }
+
+
+        // ==================== ВСТРОЕННЫЙ САЛЮТ ====================
+        function fireConfetti() {
+            // Создаём 50 разноцветных частиц
+            const colors = ['#ff4d4d', '#ffaa00', '#4caf50', '#667eea', '#f093fb', '#ffd700'];
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = Math.random() * 8 + 4 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.borderRadius = '50%';
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.top = window.innerHeight - 50 + 'px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '9999';
+                particle.style.transition = 'all 1s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+                document.body.appendChild(particle);
+                
+                // Случайное направление и высота
+                const xOffset = (Math.random() - 0.5) * 200;
+                const yOffset = -150 - Math.random() * 200;
+                
+                setTimeout(() => {
+                    particle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+                    particle.style.opacity = '0';
+                }, 10);
+                
+                // Удаляем после анимации
+                setTimeout(() => {
+                    particle.remove();
+                }, 1200);
+            }
+        }
+        
+        // Более мощный салют для 4-го уровня
+        // Эпический салют для 4-го уровня — 5 залпов + финал
+        function fireBigConfetti() {
+            const colors = ['#ff4d4d', '#ffaa00', '#4caf50', '#667eea', '#f093fb', '#ff6b6b', '#ffd700', '#ff8800', '#ff3399', '#33ff99'];
+            
+            // Залп 1: центр
+            for (let i = 0; i < 70; i++) {
+                createParticle(window.innerWidth / 2 + (Math.random() - 0.5) * 100, window.innerHeight - 50, colors);
+            }
+            
+            // Залп 2: левый край
+            setTimeout(() => {
+                for (let i = 0; i < 50; i++) {
+                    createParticle(50 + Math.random() * 100, window.innerHeight - 40, colors);
+                }
+            }, 150);
+            
+            // Залп 3: правый край
+            setTimeout(() => {
+                for (let i = 0; i < 50; i++) {
+                    createParticle(window.innerWidth - 150 + Math.random() * 100, window.innerHeight - 40, colors);
+                }
+            }, 300);
+            
+            // Залп 4: разлетающиеся из центра (кругом)
+            setTimeout(() => {
+                for (let i = 0; i < 80; i++) {
+                    const angle = (i / 80) * Math.PI * 2;
+                    const xOffset = Math.cos(angle) * 150;
+                    const yOffset = Math.sin(angle) * 150 - 100;
+                    
+                    const particle = document.createElement('div');
+                    particle.style.position = 'fixed';
+                    particle.style.width = Math.random() * 8 + 4 + 'px';
+                    particle.style.height = particle.style.width;
+                    particle.style.borderRadius = '50%';
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.left = window.innerWidth / 2 + 'px';
+                    particle.style.top = window.innerHeight - 60 + 'px';
+                    particle.style.pointerEvents = 'none';
+                    particle.style.zIndex = '9999';
+                    particle.style.transition = 'all 1.2s cubic-bezier(0.2, 0.8, 0.4, 1.2)';
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+                        particle.style.opacity = '0';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 1300);
+                }
+            }, 450);
+            
+            // Залп 5: дождь сверху
+            setTimeout(() => {
+                for (let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.style.position = 'fixed';
+                    particle.style.width = Math.random() * 8 + 4 + 'px';
+                    particle.style.height = particle.style.width;
+                    particle.style.borderRadius = '50%';
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.left = Math.random() * window.innerWidth + 'px';
+                    particle.style.top = '-20px';
+                    particle.style.pointerEvents = 'none';
+                    particle.style.zIndex = '9999';
+                    particle.style.transition = 'all 1.2s ease-in';
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.style.transform = `translateY(${window.innerHeight + 80}px)`;
+                        particle.style.opacity = '0';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 1300);
+                }
+            }, 600);
+            
+            // Финальный взрыв (маленькие искры) через 0.8 сек
+            setTimeout(() => {
+                for (let i = 0; i < 100; i++) {
+                    const particle = document.createElement('div');
+                    particle.style.position = 'fixed';
+                    particle.style.width = Math.random() * 5 + 2 + 'px';
+                    particle.style.height = particle.style.width;
+                    particle.style.borderRadius = '50%';
+                    particle.style.backgroundColor = `hsl(${Math.random() * 360}, 90%, 65%)`;
+                    particle.style.left = window.innerWidth / 2 + (Math.random() - 0.5) * 200 + 'px';
+                    particle.style.top = window.innerHeight - 80 + (Math.random() - 0.5) * 100 + 'px';
+                    particle.style.pointerEvents = 'none';
+                    particle.style.zIndex = '9999';
+                    particle.style.transition = 'all 0.8s ease-out';
+                    document.body.appendChild(particle);
+                    
+                    const xOffset = (Math.random() - 0.5) * 300;
+                    const yOffset = (Math.random() - 0.5) * 200 - 100;
+                    
+                    setTimeout(() => {
+                        particle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+                        particle.style.opacity = '0';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 900);
+                }
+            }, 800);
+        }
+        
+        // Вспомогательная функция для создания одной частицы
+        function createParticle(x, y, colors) {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = Math.random() * 10 + 4 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.borderRadius = '50%';
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '9999';
+            particle.style.transition = 'all 1s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+            document.body.appendChild(particle);
+            
+            const xOffset = (Math.random() - 0.5) * 250;
+            const yOffset = -150 - Math.random() * 250;
+            
+            setTimeout(() => {
+                particle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+                particle.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 1200);
         }
         
         // ==================== ИНИЦИАЛИЗАЦИЯ ====================
@@ -946,9 +1302,24 @@
             document.getElementById('skipBtn').onclick = skipProduct;
             document.getElementById('resetBtn').onclick = resetCurrentLevel;
             document.getElementById('settingsBtn').onclick = openSettingsModal;
+            document.getElementById('fullResetBtn').onclick = () => {
+                if (confirm('Начать игру с 1-го уровня? Весь прогресс будет потерян.')) {
+                    currentLevel = 1;
+                    currentBalance = settings.startBalance;
+                    currentStreak = 0;
+                    currentProduct = generateProduct();
+                    purchaseHistory = [];
+                    gameOver = false;
+                    updateUI();
+                    saveProgress();
+                    showToast('Игра начата заново! Уровень 1');
+                }
+            };
         }
         
         init();
     </script>
+
+
 </body>
 </html>
