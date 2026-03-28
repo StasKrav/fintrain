@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrain — Зелёный этап</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/styles.css">
+    <style>
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2c7a4d;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header green" id="appHeader">
+            <div class="header-top">
+                <a href="../index.html" class="back-link">← На главную</a>
+                <div class="level-badge" id="levelBadge">Уровень 1</div>
+                <button class="settings-icon" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                        <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        
+            <div class="balance">
+                <div class="balance-label">ВАШ БАЛАНС</div>
+                <div class="balance-value" id="balanceValue">10000 ₽</div>
+                <div class="balance-warning" id="balanceWarning" style="display: none;">⚠️ Низкий баланс! Будьте осторожны</div>
+            </div>
+        
+            <div class="level-progress">
+                <div class="progress-bar-container">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-stats" id="progressStats">
+                    <span id="currentStreak">0</span>/<span id="requiredStreak">10</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="gameOverContainer" style="display: none;"></div>
+            <div id="productContainer"></div>
+
+            <div class="action-area">
+                <button class="btn btn-primary" id="buyBtn">Купить</button>
+                <button class="btn btn-secondary" id="skipBtn">Следующий товар</button>
+                <button class="btn btn-secondary" id="resetBtn">Сбросить уровень</button>
+            </div>
+
+            <div class="history-section">
+                <div class="history-title">История покупок</div>
+                <div class="history-list" id="historyList">
+                    <div style="color: #ccc;">Пока пусто</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../shared/utils.js"></script>
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ====================
+        const LEVELS = {
+            1: {
+                name: "Уровень 1",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price / 50) * 50
+            },
+            2: {
+                name: "Уровень 2",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price / 10) * 10
+            },
+            3: {
+                name: "Уровень 3",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price / 5) * 5
+            },
+            4: {
+                name: "Уровень 4 (Мастер)",
+                requiredStreak: 10,
+                priceModifier: (price) => Math.round(price)
+            }
+        };
+
+        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+        let currentLevel = 1;
+        let currentBalance = 10000;
+        let currentStreak = 0;
+        let currentProduct = null;
+        let purchaseHistory = [];
+        let gameOver = false;
+
+        const categories = ["🍕 Еда", "🚗 Транспорт", "📱 Техника", "👕 Одежда", "📚 Книги", "🎮 Развлечения", "💊 Здоровье", "🏃 Спорт", "☕ Кофе", "🎁 Подарки"];
+        const productNames = [
+            "Пицца Маргарита", "Проездной билет", "Смарт-часы", "Джинсы", "Книга-бестселлер",
+            "Игровая приставка", "Витамины", "Абонемент в зал", "Латте с корицей", "Набор для творчества",
+            "Рюкзак", "Наушники", "Стейк", "Такси", "Подарочная карта", "Кроссовки", "Кофеварка",
+            "Билет в кино", "Парфюм", "Настольная игра"
+        ];
+
+        // ==================== ЗАГРУЗКА/СОХРАНЕНИЕ ====================
+        function saveProgress() {
+            const progress = {
+                currentLevel,
+                currentBalance,
+                currentStreak,
+                purchaseHistory,
+                gameOver
+            };
+            localStorage.setItem('greenStage_progress', JSON.stringify(progress));
+            localStorage.setItem('greenStage_level', currentLevel);
+            localStorage.setItem('greenStage_streak', currentStreak);
+            
+            // Проверяем, пройден ли весь этап
+            if (currentLevel === 4 && currentStreak >= LEVELS[4].requiredStreak) {
+                localStorage.setItem('greenStage_completed', 'true');
+            }
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('greenStage_progress');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currentLevel = data.currentLevel || 1;
+                    currentBalance = data.currentBalance || settings.startBalance;
+                    currentStreak = data.currentStreak || 0;
+                    purchaseHistory = data.purchaseHistory || [];
+                    gameOver = data.gameOver || false;
+                } catch(e) {}
+            }
+            
+            // Загружаем настройки
+            loadSettings();
+            if (currentBalance === 10000 && settings.startBalance !== 10000) {
+                currentBalance = settings.startBalance;
+            }
+        }
+
+        // ==================== ГЕНЕРАЦИЯ ТОВАРА ====================
+        function generateProduct() {
+            const min = settings.priceMin;
+            const max = settings.priceMax;
+            
+            let maxPrice = max;
+            if (currentBalance < min) {
+                if (currentBalance <= 0) {
+                    gameOver = true;
+                    saveProgress();
+                    updateUI();
+                    return null;
+                }
+                maxPrice = currentBalance;
+            } else {
+                const safeMax = Math.min(max, Math.floor(currentBalance * 0.6));
+                maxPrice = Math.max(min, safeMax);
+            }
+            
+            let rawPrice = min + Math.random() * (maxPrice - min);
+            const modifier = LEVELS[currentLevel].priceModifier;
+            let price = modifier(rawPrice);
+            price = Math.max(min, Math.min(maxPrice, price));
+            
+            const name = productNames[Math.floor(Math.random() * productNames.length)];
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            
+            return {
+                name,
+                category,
+                price,
+                id: Date.now() + Math.random()
+            };
+        }
+
+        function canAfford(price) {
+            if (gameOver) return false;
+            if (currentBalance <= 0) {
+                showToast('💀 Игра окончена! Нажмите "Сбросить уровень"', true);
+                return false;
+            }
+            if (price > currentBalance) {
+                showToast(`❌ Не хватает ${Math.abs(currentBalance - price)} ₽!`, true);
+                currentStreak = 0;
+                updateUI();
+                saveProgress();
+                return false;
+            }
+            return true;
+        }
+
+        // ==================== UI ОБНОВЛЕНИЕ ====================
+        function updateUI() {
+            document.getElementById('balanceValue').textContent = `${Math.floor(currentBalance)} ₽`;
+            
+            const warning = document.getElementById('balanceWarning');
+            if (currentBalance < settings.startBalance * 0.2 && currentBalance > 0) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+            
+            const levelData = LEVELS[currentLevel];
+            document.getElementById('levelBadge').innerHTML = levelData.name;
+            
+            const required = levelData.requiredStreak;
+            const progressPercent = (currentStreak / required) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('requiredStreak').textContent = required;
+            
+            // История
+            const historyContainer = document.getElementById('historyList');
+            if (purchaseHistory.length === 0) {
+                historyContainer.innerHTML = '<div style="color: #ccc;">Пока пусто</div>';
+            } else {
+                historyContainer.innerHTML = purchaseHistory.slice(-10).reverse().map(item => `
+                    <div class="history-item">
+                        ${item.name} — ${item.price} ₽ → осталось: ${item.newBalance} ₽
+                        <span style="font-size: 11px; color: #aaa;">${new Date(item.date).toLocaleTimeString()}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Game Over
+            const gameOverContainer = document.getElementById('gameOverContainer');
+            if (gameOver || currentBalance <= 0) {
+                gameOver = true;
+                gameOverContainer.style.display = 'block';
+                gameOverContainer.innerHTML = `
+                    <div class="game-over">
+                        <h3>💀 ИГРА ОКОНЧЕНА 💀</h3>
+                        <p>Вы потратили все деньги! Баланс: ${currentBalance} ₽</p>
+                        <button class="btn btn-danger" id="restartGameBtn">🔄 Начать заново</button>
+                    </div>
+                `;
+                document.getElementById('buyBtn').disabled = true;
+                document.getElementById('skipBtn').disabled = true;
+                document.getElementById('restartGameBtn').onclick = () => {
+                    resetGame();
+                };
+            } else {
+                gameOverContainer.style.display = 'none';
+                document.getElementById('buyBtn').disabled = false;
+                document.getElementById('skipBtn').disabled = false;
+            }
+            
+            renderProduct();
+        }
+        
+        function renderProduct() {
+            const container = document.getElementById('productContainer');
+            
+            if (gameOver || currentBalance <= 0) {
+                container.innerHTML = `
+                    <div class="product-card disabled">
+                        <div class="product-name">💰 Игра завершена</div>
+                        <div class="product-price">- ₽</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (!currentProduct || currentProduct.price > currentBalance) {
+                currentProduct = generateProduct();
+                if (!currentProduct) return;
+            }
+            
+            container.innerHTML = `
+                <div class="product-card">
+                    <div class="product-name">${currentProduct.name}</div>
+                    <div class="product-price">${currentProduct.price} ₽</div>
+                    <div style="font-size: 14px; color: #888; margin-top: 12px;">
+                        Нажмите "Купить" и введи сумму, которая останется после покупки
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ==================== МОДАЛЬНОЕ ОКНО ====================
+        function openAnswerModal(price, correctNewBalance, description) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Сколько останется?</h3>
+                    <div style="font-size: 20px; color: #888; margin-bottom: 8px;">Текущий баланс: ${currentBalance} ₽</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #2c7a4d; margin: 20px 0;">
+                        ${price} ₽
+                    </div>
+                    <div style="font-size: 14px; color: #666;">${description}</div>
+                    <input type="number" id="answerInput" placeholder="Введи сумму" autofocus>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+                        <button class="btn btn-primary" id="submitBtn">Проверить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const input = modal.querySelector('#answerInput');
+            const submitBtn = modal.querySelector('#submitBtn');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            
+            const checkAnswer = () => {
+                const userAnswer = parseFloat(input.value);
+                if (isNaN(userAnswer)) {
+                    showToast('Введи число!', true);
+                    return;
+                }
+                
+                if (Math.abs(userAnswer - correctNewBalance) < 0.51) {
+                    currentBalance = correctNewBalance;
+                    currentStreak++;
+                    
+                    purchaseHistory.push({
+                        name: description,
+                        price: price,
+                        newBalance: currentBalance,
+                        date: new Date().toISOString()
+                    });
+                    
+                    showToast(`✅ Верно! Остаток: ${currentBalance} ₽`);
+                    
+                    if (currentBalance <= 0) {
+                        showToast(`💀 Деньги закончились! Игра окончена.`, true);
+                        gameOver = true;
+                        saveProgress();
+                        updateUI();
+                        modal.remove();
+                        return;
+                    }
+                    
+                    currentProduct = generateProduct();
+                    updateUI();
+                    saveProgress();
+                    checkLevelUp();
+                    modal.remove();
+                } else {
+                    currentStreak = 0;
+                    showToast(`❌ Неверно! Правильный ответ: ${correctNewBalance} ₽`, true);
+                    updateUI();
+                    saveProgress();
+                    modal.remove();
+                }
+            };
+            
+            submitBtn.onclick = checkAnswer;
+            cancelBtn.onclick = () => modal.remove();
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            });
+            input.focus();
+        }
+        
+        // ==================== ДЕЙСТВИЯ ====================
+        function purchaseProduct() {
+            if (gameOver) {
+                showToast('Игра окончена! Сбросьте уровень', true);
+                return;
+            }
+            
+            if (!currentProduct) {
+                currentProduct = generateProduct();
+                if (!currentProduct) return;
+            }
+            
+            const price = currentProduct.price;
+            if (!canAfford(price)) {
+                updateUI();
+                return;
+            }
+            
+            const correctNewBalance = currentBalance - price;
+            openAnswerModal(price, correctNewBalance, currentProduct.name);
+        }
+        
+        function skipProduct() {
+            if (gameOver) {
+                showToast('Игра окончена! Сбросьте уровень', true);
+                return;
+            }
+            currentProduct = generateProduct();
+            updateUI();
+            showToast('🔄 Новый товар');
+        }
+        
+        function resetGame() {
+            gameOver = false;
+            currentBalance = settings.startBalance;
+            currentStreak = 0;
+            currentProduct = generateProduct();
+            purchaseHistory = [];
+            updateUI();
+            saveProgress();
+            showToast(`Игра перезапущена! Баланс: ${currentBalance} ₽`);
+        }
+        
+        function resetCurrentLevel() {
+            if (confirm(`Сбросить ${LEVELS[currentLevel]?.name}? Прогресс будет потерян.`)) {
+                resetGame();
+            }
+        }
+        
+        function checkLevelUp() {
+            if (gameOver) return false;
+            
+            const required = LEVELS[currentLevel].requiredStreak;
+            
+            if (currentStreak >= required && currentLevel < 4) {
+                const nextLevel = currentLevel + 1;
+                
+                if (nextLevel === 3) {
+                    fireConfetti();
+                    showToast(`🎉 Поздравляю! Открыт ${LEVELS[nextLevel].name}! 🎉`);
+                } else if (nextLevel === 4) {
+                    fireBigConfetti();
+                    showToast(`🏆 ВОЛШЕБНО! Вы достигли ${LEVELS[nextLevel].name}! 🏆`);
+                } else {
+                    fireConfetti();
+                    showToast(`🎉 Поздравляю! Открыт ${LEVELS[nextLevel].name}!`);
+                }
+                
+                currentLevel = nextLevel;
+                currentStreak = 0;
+                currentProduct = generateProduct();
+                updateUI();
+                saveProgress();
+                return true;
+            }
+            
+            // Проверяем полное завершение зелёного этапа
+            if (currentLevel === 4 && currentStreak >= required) {
+                fireBigConfetti();
+                localStorage.setItem('greenStage_completed', 'true');
+                showVictoryModal();
+                return true;
+            }
+            
+            return false;
+        }
+        
+        function showVictoryModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px; text-align: center;">
+                    <h3>🏆 ПОБЕДА! 🏆</h3>
+                    <div style="font-size: 48px; margin: 20px 0;">🎉✨🎉</div>
+                    <p style="font-size: 18px; margin-bottom: 16px;">Вы прошли зелёный этап!</p>
+                    <p style="color: #666; margin-bottom: 24px;">Правильных ответов: ${currentStreak}<br>Остаток на счету: ${currentBalance} ₽</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" id="continueToBlue">🔵 Перейти к синему этапу</button>
+                        <button class="btn btn-secondary" id="continueGreen">🟢 Продолжить тренировку</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const continueToBlue = modal.querySelector('#continueToBlue');
+            const continueGreen = modal.querySelector('#continueGreen');
+            
+            continueToBlue.onclick = () => {
+                window.location.href = '../blue-stage/index.html';
+            };
+            
+            continueGreen.onclick = () => {
+                currentStreak = 0;
+                updateUI();
+                saveProgress();
+                modal.remove();
+                showToast('⭐ Продолжайте тренировку на зелёном этапе!');
+            };
+        }
+        
+        // ==================== НАСТРОЙКИ ====================
+        function applySettings(newSettings) {
+            settings = newSettings;
+            if (!gameOver && currentBalance === settings.startBalance) {
+                // Ничего не меняем, баланс уже правильный
+            }
+            currentProduct = generateProduct();
+            updateUI();
+        }
+        
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function init() {
+            loadProgress();
+            
+            if (!currentProduct && !gameOver && currentBalance > 0) {
+                currentProduct = generateProduct();
+            }
+            
+            updateUI();
+            
+            document.getElementById('buyBtn').onclick = purchaseProduct;
+            document.getElementById('skipBtn').onclick = skipProduct;
+            document.getElementById('resetBtn').onclick = resetCurrentLevel;
+            document.getElementById('settingsBtn').onclick = () => {
+                openSettingsModal(applySettings);
+            };
+        }
+        
+        init();
+    </script>
+</body>
+</html>
