@@ -269,8 +269,7 @@
 
         // ==================== ГЕНЕРАЦИЯ ТОВАРОВ (3-10 товаров) ====================
         function generateBasketProducts() {
-            // Случайное количество товаров от 3 до 10
-            const count = 3 + Math.floor(Math.random() * 8);
+            const count = 9; // Фиксированное количество — 9 товаров
             const products = [];
             const min = settings.priceMin;
             const max = Math.min(settings.priceMax, Math.floor(currentBalance * 0.8));
