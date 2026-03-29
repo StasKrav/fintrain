@@ -61,7 +61,7 @@
         
             <div class="balance">
                 <div class="balance-label">ВАШ БАЛАНС</div>
-                <div class="balance-value" id="balanceValue">10000 ₽</div>
+                <div class="balance-value" id="balanceValue">100000 ₽</div>
                 <div class="balance-warning" id="balanceWarning" style="display: none;">⚠️ Низкий баланс! Будьте осторожны</div>
                 <div id="balanceHint" style="font-size: 11px; margin-top: 8px; opacity: 0.8;"></div>
             </div>
@@ -192,9 +192,7 @@
             }
             
             loadSettings();
-            if (currentBalance === 100000 && settings.startBalance !== 100000) {
-                currentBalance = settings.startBalance;
-            }
+            
         }
 
         // ==================== ПРОВЕРКА "НОВОГО ДНЯ" ====================
