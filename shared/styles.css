@@ -233,8 +233,8 @@ body {
 }
 
 .btn-danger {
-    background: #dc3545;
-    color: white;
+    background: linear-gradient(135deg, #bbb, #eee);
+    color: #333;
 }
 
 /* Товары */

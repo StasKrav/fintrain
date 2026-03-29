@@ -717,6 +717,11 @@
         
         // ==================== НАСТРОЙКИ ====================
         function applySettings(newSettings) {
+            if (newSettings.reset) {
+                // Полный сброс прогресса на этом этапе
+                resetGame();
+                return;
+            }
             settings = newSettings;
             if (!gameOver && currentBalance === settings.startBalance) {
                 // ничего не меняем
@@ -741,7 +746,7 @@
             document.getElementById('skipBtn').onclick = skipProduct;
             document.getElementById('resetBtn').onclick = resetCurrentLevel;
             document.getElementById('settingsBtn').onclick = () => {
-                openSettingsModal(applySettings);
+                openSettingsModal(applySettings, 'orange');
             };
         }
         

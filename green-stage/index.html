@@ -490,11 +490,17 @@
         
         // ==================== НАСТРОЙКИ ====================
         function applySettings(newSettings) {
+            if (newSettings.reset) {
+                // Полный сброс прогресса на этом этапе
+                resetGame();
+                return;
+            }
             settings = newSettings;
             if (!gameOver && currentBalance === settings.startBalance) {
-                // Ничего не меняем, баланс уже правильный
+                // ничего не меняем
             }
-            currentProduct = generateProduct();
+            availableProducts = generateBasketProducts();
+            basketItems = [];
             updateUI();
         }
         
@@ -512,7 +518,7 @@
             document.getElementById('skipBtn').onclick = skipProduct;
             document.getElementById('resetBtn').onclick = resetCurrentLevel;
             document.getElementById('settingsBtn').onclick = () => {
-                openSettingsModal(applySettings);
+                openSettingsModal(applySettings, 'green');
             };
         }
         

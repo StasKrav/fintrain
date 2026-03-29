@@ -107,8 +107,26 @@ function showToast(message, isError = false, theme = 'green') {
 }
 
 // ==================== НАСТРОЙКИ МОДАЛКА ====================
-function openSettingsModal(onSaveCallback) {
+function openSettingsModal(onSaveCallback, themeColor = 'green') {
     loadSettings();
+    
+    // Определяем цветовую схему
+    const themeStyles = {
+        green: {
+            accent: '#2c7a4d',
+            gradient: 'linear-gradient(135deg, #2c7a4d, #3fbf7a)'
+        },
+        blue: {
+            accent: '#2c6e9e',
+            gradient: 'linear-gradient(135deg, #2c6e9e, #5fbfef)'
+        },
+        orange: {
+            accent: '#e67e22',
+            gradient: 'linear-gradient(135deg, #e67e22, #f39c12)'
+        }
+    };
+    
+    const theme = themeStyles[themeColor] || themeStyles.green;
     
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -117,23 +135,29 @@ function openSettingsModal(onSaveCallback) {
             <h3>Настройки</h3>
             
             <div class="settings-group">
-                <label>💰 Начальный баланс</label>
+                <label>Начальный баланс</label>
                 <input type="number" id="modalStartBalance" value="${settings.startBalance}" step="500" min="500">
             </div>
             
             <div class="settings-group">
-                <label>📉 Минимальная цена</label>
+                <label>Минимальная цена</label>
                 <input type="number" id="modalPriceMin" value="${settings.priceMin}" step="50" min="10">
             </div>
             
             <div class="settings-group">
-                <label>📈 Максимальная цена</label>
+                <label>Максимальная цена</label>
                 <input type="number" id="modalPriceMax" value="${settings.priceMax}" step="100" min="100">
             </div>
             
+            <div style="border-top: 1px solid #e9ecef; margin: 20px 0;"></div>
+            
+            <button class="btn btn-danger" id="fullResetFromSettings" style="width: 100%; margin-bottom: 16px;">
+                Начать игру с 1-го уровня
+            </button>
+            
             <div class="modal-actions">
                 <button class="btn btn-secondary" id="cancelSettingsBtn">Отмена</button>
-                <button class="btn btn-primary" id="saveSettingsBtn">Сохранить</button>
+                <button class="btn btn-primary" id="saveSettingsBtn" style="background: ${theme.gradient};">Сохранить</button>
             </div>
         </div>
     `;
@@ -141,6 +165,7 @@ function openSettingsModal(onSaveCallback) {
     
     const saveBtn = modal.querySelector('#saveSettingsBtn');
     const cancelBtn = modal.querySelector('#cancelSettingsBtn');
+    const fullResetBtn = modal.querySelector('#fullResetFromSettings');
     
     saveBtn.onclick = () => {
         const newStartBalance = parseInt(modal.querySelector('#modalStartBalance').value);
@@ -148,7 +173,7 @@ function openSettingsModal(onSaveCallback) {
         const newPriceMax = parseInt(modal.querySelector('#modalPriceMax').value);
         
         if (newPriceMin >= newPriceMax) {
-            showToast('Минимальная цена должна быть меньше максимальной', true);
+            showToast('Минимальная цена должна быть меньше максимальной', true, themeColor);
             return;
         }
         
@@ -165,7 +190,17 @@ function openSettingsModal(onSaveCallback) {
             onSaveCallback(settings);
         }
         
-        showToast('Настройки сохранены');
+        showToast('Настройки сохранены', false, themeColor);
+    };
+    
+    fullResetBtn.onclick = () => {
+        if (confirm('⚠️ ВНИМАНИЕ! Это сбросит весь прогресс на этом этапе. Продолжить?')) {
+            if (onSaveCallback) {
+                // Сброс прогресса
+                onSaveCallback({ reset: true });
+            }
+            modal.remove();
+        }
     };
     
     cancelBtn.onclick = () => modal.remove();
